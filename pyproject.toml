@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pybullet-simulation"
+version = "0.1.0"
+authors = [{name = "Sathvick Sudarsan", email = "sathvicksudarsan@gmail.com"}]
+description = "A package for running physics simulations with PyBullet and Globus Compute."
+readme = "README.txt"
+license = {text = "MIT"}
+dependencies = [
+    "numpy",
+    "pybullet",
+    "noise",
+    "matplotlib",
+    "globus-compute-sdk"
+]
+
+[tool.setuptools]
+packages = ["simulation"]
+include-package-data = true
