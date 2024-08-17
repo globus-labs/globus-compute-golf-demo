@@ -1,4 +1,0 @@
-noise
-numpy
-matplotlib
-scipy
