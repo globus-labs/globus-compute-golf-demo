@@ -7,7 +7,7 @@ name = "pybullet-simulation"
 version = "0.1.0"
 authors = [{name = "Sathvick Sudarsan", email = "sathvicksudarsan@gmail.com"}]
 description = "A package for running physics simulations with PyBullet and Globus Compute."
-readme = "README.txt"
+readme = "README.md"
 license = {text = "MIT"}
 dependencies = [
     "numpy",
@@ -15,6 +15,7 @@ dependencies = [
     "noise",
     "matplotlib",
     "globus-compute-sdk"
+    "globus-compute-endpoint"
 ]
 
 [tool.setuptools]
