@@ -14,7 +14,7 @@ dependencies = [
     "pybullet",
     "noise",
     "matplotlib",
-    "globus-compute-sdk"
+    "globus-compute-sdk",
     "globus-compute-endpoint"
 ]
 
