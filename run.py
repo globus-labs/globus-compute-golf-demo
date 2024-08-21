@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import random
-from simulate import generate_noisemap, generate_vertices, run_simulation, generate_heatmap
+from simulation import generate_noisemap, generate_vertices, run_simulation, generate_heatmap
 
 def main():
     parser = argparse.ArgumentParser(description="Run golf ball simulation.")
