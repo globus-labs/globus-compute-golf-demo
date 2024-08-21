@@ -10,7 +10,7 @@ description = "A package for running physics simulations with PyBullet and Globu
 readme = "README.md"
 license = {text = "MIT"}
 dependencies = [
-    "numpy",
+    "numpy<2",
     "pybullet",
     "noise",
     "matplotlib",
