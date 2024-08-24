@@ -113,47 +113,64 @@ def run_simulation(vertices, indices, initial_ball_positions, width, height, gui
     return final_ball_positions
 
 def generate_heatmap(positions, width, height, filepath):
+    import numpy as np
     import matplotlib.pyplot as plt
     from scipy.stats import gaussian_kde
 
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Two subplots for initial and final positions
+
+    # Set up a grid of points for evaluation
+    x = np.linspace(-width/2, width/2, 100)
+    y = np.linspace(-height/2, height/2, 100)
+    X, Y = np.meshgrid(x, y)
 
     for i, pos_list in enumerate(positions):
         if pos_list:  
-            flat_list = []
-            for pos in pos_list:
-                if isinstance(pos, tuple) or isinstance(pos, list):
-                    if len(pos) >= 2:
-                        flat_list.append(pos)
-                elif isinstance(pos, tuple) or isinstance(pos, list) and len(pos[0]) >= 2:
-                    flat_list.append(pos[0])
-
-            if flat_list:  
-                x, y = zip(*[(p[0], p[1]) for p in flat_list])
+            flat_list = [(pos[0], pos[1]) for pos in pos_list if isinstance(pos, (list, tuple)) and len(pos) >= 2]
+            if flat_list:
+                x, y = zip(*flat_list)
                 xy = np.vstack([x, y])
-                z = gaussian_kde(xy)(xy)
-                sc = axs[i].scatter(x, y, c=z, s=100, cmap='jet')
+                kde = gaussian_kde(xy)
+                Z = kde(np.vstack([X.ravel(), Y.ravel()])).reshape(X.shape)
+                cs = axs[i].contourf(X, Y, Z, levels=25, cmap='jet')
                 axs[i].set_title('Initial Positions' if i == 0 else 'Final Positions')
-                axs[i].set_xlim(-width/2, width/2)
-                axs[i].set_ylim(-height/2, height/2)
             else:
                 axs[i].text(0.5, 0.5, 'No Data', horizontalalignment='center', verticalalignment='center', transform=axs[i].transAxes)
         else:
             axs[i].text(0.5, 0.5, 'No Data', horizontalalignment='center', verticalalignment='center', transform=axs[i].transAxes)
 
+        axs[i].set_xlim(-width/2, width/2)
+        axs[i].set_ylim(-height/2, height/2)
         axs[i].set_xlabel("X position")
         axs[i].set_ylabel("Y position")
         axs[i].set_facecolor('green')
 
-    plt.colorbar(sc, ax=axs, location='right')
+    fig.colorbar(cs, ax=axs, orientation='vertical')
     plt.savefig(filepath)
+
 
 def generate_3d_heatmap(initial_positions, final_positions, width, height, filepath):
     import numpy as np
     import matplotlib.pyplot as plt
+    import noise
+    import scipy.ndimage
     from scipy.stats import gaussian_kde
     from mpl_toolkits.mplot3d import Axes3D
 
+    # Parameters for terrain generation
+    scale = 0.025  # Adjust this for different terrain scales
+    octaves = 3  # More octaves means more detail in Perlin noise
+    persistence = 0.2  # Increasing persistence ([0, 1]) increases roughness
+    filter_size = 32  # Number of pixels per standard deviation for Gaussian filter
+
+    terrain = np.zeros((height, width))
+    for y in range(height):
+        for x in range(width):
+            terrain[y, x] = noise.pnoise2(x * scale, y * scale, octaves=octaves, persistence=persistence)
+
+    terrain = scipy.ndimage.gaussian_filter(terrain, filter_size)
+
+    x_coords, y_coords = np.meshgrid(np.linspace(-width/2, width/2, width), np.linspace(-height/2, height/2, height))
     fig = plt.figure(figsize=(14, 7))
     axs = [fig.add_subplot(1, 2, i+1, projection='3d') for i in range(2)]
     positions = [initial_positions, final_positions]
@@ -161,23 +178,25 @@ def generate_3d_heatmap(initial_positions, final_positions, width, height, filep
 
     for ax, pos_list, title in zip(axs, positions, titles):
         ax.set_facecolor('green')
+        ax.plot_surface(x_coords, y_coords, terrain, cmap='Greens', alpha=0.6, edgecolor='none')
+
         if pos_list:
-            processed_positions = [(pos[0] + np.random.normal(0, 0.01), pos[1] + np.random.normal(0, 0.01), pos[2] + np.random.normal(0, 0.01)) 
-                                   for pos in pos_list if isinstance(pos, (list, tuple)) and len(pos) == 3]
-            if processed_positions:
-                x, y, z = zip(*processed_positions)
-                xyz = np.vstack([x, y, z])
-                kde = gaussian_kde(xyz)(xyz)
-                sc = ax.scatter(x, y, z, c=kde, s=100, cmap='jet')
-                plt.colorbar(sc, ax=ax)
+            x, y, z = zip(*pos_list)
+            xyz = np.vstack([x, y])
+            kde = gaussian_kde(xyz)(xyz)
+            kde_grid = np.zeros_like(terrain)
+            for i, (xi, yi) in enumerate(zip(x, y)):
+                xi_index = int((xi + width/2) / width * width)
+                yi_index = int((yi + height/2) / height * height)
+                kde_grid[yi_index, xi_index] = kde[i]
+
+            kde_smoothed = scipy.ndimage.gaussian_filter(kde_grid, sigma=3) 
+            ax.plot_surface(x_coords, y_coords, terrain, facecolors=plt.cm.jet(kde_smoothed/kde_smoothed.max()), alpha=0.9)
 
         ax.set_title(title)
         ax.set_xlim([-width/2, width/2])
         ax.set_ylim([-height/2, height/2])
-        ax.set_zlim([0, max(z) * 1.2 if processed_positions else 1])
-        ax.set_xlabel("X position")
-        ax.set_ylabel("Y position")
-        ax.set_zlabel("Z position")
+        ax.set_zlim([terrain.min(), terrain.max()])
 
     plt.savefig(filepath)
 
