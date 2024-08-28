@@ -1,101 +1,80 @@
-# Golf Ball Simulation
+# Globus Compute Golf Simulation Demo
 
-This project is a physics-based simulation of golf balls on a procedurally generated terrain using PyBullet. The simulation creates a visual representation of a golf green where multiple golf balls are dropped, and their movements are tracked to study their final positions on the terrain.
+This demo showcases executing simulations at scale using [Globus Compute](https://www.globus.org/compute).
 
-## Project Structure
+As a proxy for a *real scientific simulation*, this demo simulates dropping golf balls on a green.
+A golf green is randomly generated using [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise), and the simulation is performed using [PyBullet](https://github.com/bulletphysics/bullet3).
 
-This project uses a `pyproject.toml` file to manage dependencies and build configurations. All necessary packages will be automatically installed when setting up the project.
+* [Installation](#installation)
+* [Visualize a Simulation](#visualize-a-simulation)
+* [Simulate at Scale](#simulate-at-scale)
 
-## Installation Instructions
+## Installation
+
+> [!WARNING]
+> We have encounter PyBullet crashes on Apple Silicon.
+> The Globus Compute script can still be run provided the Globus Compute Endpoint is running on Linux.
 
 1. **Clone the repository and navigate to the project directory:**
-    ```bash
-    git clone <repository-url>
-    cd Pybullet\ Simulations
-    ```
-
+   ```bash
+   git clone https://github.com/globus-labs/globus-compute-golf-demo
+   cd globus-compute-golf-demo
+   ```
 2. **Create a virtual environment:**
-    ```bash
-    python -m venv globus_compute_venv
-    source globus_compute_venv/bin/activate
-    ```
-
-3. **Install the package and dependencies using the pyproject.toml:**
+   This demo requires Python 3.9 or later.
+   ```bash
+   python -m venv venv
+   . venv/bin/activate
+   ```
+   You may use alternate environment managers, such as Conda, provided you have `pip` installed.
+   We **do not** recommend installing the packages into your system Python.
+3. **Install the package and dependencies:**
     ```bash
     pip install .
     ```
+4. **Configure a Globus Compute Endpoint:**
+   This step can be performed on your local machine or on a remote machine.
+   You will need to authenticate with Globus Auth if you have not used Globus Compute on your local device before.
+   A UUID for your endpoint will be returned; save this for later (you can find it later with `globus-compute-endpoint list`).
+   ```bash
+   globus-compute-endpoint configure golf-demo
+   globus-compute-endpoint start golf-demo
+   ```
+   For more information on configuring Endpoints, check out the [docs](https://globus-compute.readthedocs.io/en/latest/endpoints/index.html).
 
-   This command will install all required dependencies listed in the `pyproject.toml` file, including `numpy`, `pybullet`, `matplotlib`, `globus-compute-sdk`, and `globus-compute-endpoint`.
+## Visualize a Simulation
 
-## Running the Simulation
+We will start with running a single simulation locally to visualize what the simulation looks like.
+This will generate a random terrain and drop a ball at a random position.
 
-To run the simulation, execute the `run.py` or `run_globus_compute.py` script, which interfaces with the functionalities provided in the `simulation` package. The script can be run in two modes:
-
-- **Headless Mode (No GUI):** For automated runs, useful for data collection or running on servers.
-- **GUI Mode:** For visualizing the simulation in real-time.
-
-### Commands
-
-- **Run Simulation with GUI:**
-    ```bash
-    python run.py --gui
-    ```
-
-- **Run Simulation Headless (No GUI):**
-    ```bash
-    python run.py
-    ```
-
-### Configuration Parameters
-
-You can adjust the following parameters via command-line arguments:
-
-- `width` (int): Width of the golf green.
-- `height` (int): Height of the golf green.
-- `scale` (float): Scale of the noise map affecting terrain roughness.
-- `octaves` (int): Number of octaves for noise generation.
-- `persistence` (float): Persistence factor of the noise.
-- `lacunarity` (float): Lacunarity of the noise.
-- `height_multiplier` (float): Multiplier for the terrain height to exaggerate vertical features.
-- `num_balls` (int): Number of golf balls to simulate.
-
-### Example
 ```bash
-python run.py --width 100 --height 100 --scale 10.0 --octaves 2 --persistence 0.5 --lacunarity 2.0 --height_multiplier 2.0 --num_balls 10 --gui
+python run_single.py --num-balls 100
 ```
 
-## Configure and Start Globus Compute Endpoint
-The Globus Compute endpoint can only be configured and run on Linux-based systems, as it requires Linux-specific dependencies and environment settings.
+You should see a pop up window that looks like the following.
+![](images/simulation.png)
 
-To use Globus Compute for distributed execution:
+The parameters of the simulation are fully configurable.
+Use `python run_single.py --help` to see all of the options.
 
-1. **Configure your endpoint:**
-    ```bash
-    globus-compute-endpoint configure my_endpoint
-    ```
+## Simulate at Scale
 
-2. **Start the endpoint:**
-    ```bash
-    globus-compute-endpoint start my_endpoint
-    ```
-### Running the Simulation with Globus Compute
+Next, we can run the same simulation at scale by generating `n` random initial ball positions and submitting one simulation per ball to Globus Compute.
+Globus Compute will manage the parallel execution of tasks on the Endpoint you configured.
+Replace `<UUID>` with the UUID of your Endpoint.
 
-- **Once your endpoint is active:**
-    ```bash
-    python run_globus_compute.py --globus_compute --endpoint_id <your-endpoint-id>
+```bash
+python run_globus_compute.py --num-balls 1000 --endpoint <UUID>
+```
 
-    ```
-- Replace <your-endpoint-id> with the actual ID of your Globus Compute endpoint.
+> [!TIP]
+> Passing `--process-pool 8` instead of `--endpoint <UUID>` will run the simulations across a pool of 8 local processes rather than via Globus Compute.
 
-- This will submit the task to the specified Globus Compute endpoint, enabling scalable distributed execution of your simulation.
+Because the simulations are executed in parallel on remote processes, the simulations are performed in a "headless" mode (i.e., the simulation is not rendered to the screen).
+The script visualizes the results of the simulations via plots that are saved to `images/`.
 
-## Example Outputs
+**2D Contour Plot** (`images/contour.png`)
+![](images/contour.png)
 
-- Simulation:
-  ![alt text](<Images/Golf green simulation.jpg>)
-
-- 2-D Contour Plot:
-  ![alt text](<Images/2-d Contour plot.png>)
-
-- 3-D Heatmap:
-  ![alt text](<Images/3-d heatmap.jpg>)
+**3D Terrain Heatmap** (`images/terrain.png`)
+![](images/terrain.png)
