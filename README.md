@@ -48,11 +48,11 @@ We will start with running a single simulation locally to visualize what the sim
 This will generate a random terrain and drop a ball at a random position.
 
 ```bash
-python run_single.py
+python run_single.py --num-balls 100
 ```
 
 You should see a pop up window that looks like the following.
-![](images/Golf green simulation.jpg)
+![](images/simulation.png)
 
 The parameters of the simulation are fully configurable.
 Use `python run_single.py --help` to see all of the options.
@@ -63,15 +63,18 @@ Next, we can run the same simulation at scale by generating `n` random initial b
 Globus Compute will manage the parallel execution of tasks on the Endpoint you configured.
 Replace `<UUID>` with the UUID of your Endpoint.
 
-```
+```bash
 python run_globus_compute.py --num-balls 1000 --endpoint <UUID>
 ```
+
+> [!TIP]
+> Passing `--process-pool 8` instead of `--endpoint <UUID>` will run the simulations across a pool of 8 local processes rather than via Globus Compute.
 
 Because the simulations are executed in parallel on remote processes, the simulations are performed in a "headless" mode (i.e., the simulation is not rendered to the screen).
 The script visualizes the results of the simulations via plots that are saved to `images/`.
 
-**2D Contour Plot**
-![](images/2-d Contour plot.png)
+**2D Contour Plot** (`images/contour.png`)
+![](images/contour.png)
 
-**3D Map**
-![](images/3-d heatmap.jpg)
+**3D Terrain Heatmap** (`images/terrain.png`)
+![](images/terrain.png)

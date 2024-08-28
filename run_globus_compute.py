@@ -13,6 +13,7 @@ from simulation.simulate import generate_initial_positions
 from simulation.simulate import generate_noisemap
 from simulation.simulate import generate_vertices
 from simulation.simulate import run_simulation
+from simulation.plot import create_contour_plot, create_terrain_plot
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -38,6 +39,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         '--process-pool',
         type=int,
         help='number of local process to execute simulation across',
+    )
+    group.add_argument(
+        '--contour-plot',
+        default='images/contour.png',
+        help='filepath for saving contour plot',
+    )
+    group.add_argument(
+        '--terrain-plot',
+        default='images/terrain.png',
+        help='filepath for saving 3D terrain plot',
     )
     SimulationConfig.add_argument_group(parser)
     TerrainConfig.add_argument_group(parser)
@@ -75,6 +86,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         final_positions = [pos for result in results for pos in result]
 
     print(f'Received {len(final_positions)} final positions')
+
+    create_contour_plot(
+        initial_positions,
+        final_positions,
+        terrain_heightmap,
+        terrain_config,
+        args.contour_plot,
+    )
+    print(f'Saved contour map to {args.contour_plot}')
+    
+    create_terrain_plot(
+        initial_positions,
+        final_positions,
+        terrain_heightmap,
+        terrain_config,
+        args.terrain_plot,
+    )
+    print(f'Saved terrain map to {args.terrain_plot}')
 
 
 if __name__ == '__main__':

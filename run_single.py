@@ -20,6 +20,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         description='Simulate a golf ball',
     )
     parser.add_argument(
+        '--num-balls',
+        default=1,
+        type=int,
+        help='number of balls to simulate',
+    )
+    parser.add_argument(
         '--gui',
         default=True,
         action=argparse.BooleanOptionalAction,
@@ -35,17 +41,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     terrain_heightmap = generate_noisemap(terrain_config)
     terrain_mesh = generate_vertices(terrain_heightmap, terrain_config)
 
-    (initial_position,) = generate_initial_positions(1, terrain_config)
-    print(f'Initial position: {initial_position}')
+    initial_positions = generate_initial_positions(args.num_balls, terrain_config)
+    print(f'Generated {len(initial_positions)} initial positions')
 
-    (final_position,) = run_simulation(
+    final_positions = run_simulation(
         terrain_mesh,
-        [initial_position],
+        initial_positions,
         sim_config=sim_config,
         terrain_config=terrain_config,
         gui=args.gui,
     )
-    print(f'Final position: {final_position}')
+    print(f'Received {len(final_positions)} final positions')
 
 
 if __name__ == '__main__':
