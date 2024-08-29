@@ -85,7 +85,7 @@ def create_terrain_plot(
             y,
             heightmap,
             facecolors=plt.cm.jet(  # type: ignore[attr-defined]
-                kde_smoothed / kde_smoothed.max()
+                kde_smoothed / kde_smoothed.max(),
             ),
             alpha=0.9,
         )

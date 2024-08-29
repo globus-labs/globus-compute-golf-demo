@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from concurrent.futures import Executor, ProcessPoolExecutor
+from concurrent.futures import Executor
+from concurrent.futures import ProcessPoolExecutor
 from typing import Sequence
 
 from globus_compute_sdk import Executor as GlobusComputeExecutor

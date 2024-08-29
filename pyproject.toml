@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["mypy", "ruff"]
+dev = ["mypy", "pre-commit", "ruff"]
 
 [tool.mypy]
 python_version = "3.10"

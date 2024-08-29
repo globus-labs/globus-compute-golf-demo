@@ -6,11 +6,11 @@ import time
 from typing import Any
 
 import numpy as np
-import pybullet as p  # type: ignore[import-not-found]
+import pybullet as p
 import pybullet_data
 import scipy
-from numpy.typing import NDArray
 from noise import pnoise2
+from numpy.typing import NDArray
 
 from simulation.config import SimulationConfig
 from simulation.config import TerrainConfig
@@ -59,7 +59,7 @@ def generate_noisemap(config: TerrainConfig) -> NDArray[np.float64]:
 
     # Smooth terrain with gaussian filter
     heightmap = scipy.ndimage.gaussian_filter(heightmap, config.filter_size)
-    # Scale terrain heigh to be [0, config.height]
+    # Scale terrain height to be [0, config.height]
     old_min, old_max = heightmap.min(), heightmap.max()
     return (heightmap - old_min) * config.height / old_max
 

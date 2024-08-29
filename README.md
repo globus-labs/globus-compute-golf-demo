@@ -91,10 +91,8 @@ To contributed to this repository:
    pip install -e .[dev]
    ```
 3. Make your changes.
-4. Apply `ruff` formatting, then ensure the linting and static type checking passes.
+4. Run the pre-commit checks and fix any issues.
    ```bash
-   ruff format run_*.py simulation
-   ruff check --fix run_*.py simulation
-   mypy run_*.py simulation
+   pre-commit run --all-files
    ```
 5. Commit your changes and open a pull request.
