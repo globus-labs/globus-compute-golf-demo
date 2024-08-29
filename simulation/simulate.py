@@ -6,9 +6,10 @@ import time
 from typing import Any
 
 import numpy as np
-import pybullet as p
+import pybullet as p  # type: ignore[import-not-found]
 import pybullet_data
 import scipy
+from numpy.typing import NDArray
 from noise import pnoise2
 
 from simulation.config import SimulationConfig
@@ -42,7 +43,7 @@ def generate_initial_positions(
     return [_generate() for _ in range(num_balls)]
 
 
-def generate_noisemap(config: TerrainConfig) -> np.ndarray:
+def generate_noisemap(config: TerrainConfig) -> NDArray[np.float64]:
     dimension = config.width * config.resolution
     heightmap = np.zeros((dimension, dimension))
 
@@ -63,7 +64,10 @@ def generate_noisemap(config: TerrainConfig) -> np.ndarray:
     return (heightmap - old_min) * config.height / old_max
 
 
-def generate_vertices(heightmap: np.ndarray, config: TerrainConfig) -> Terrain:
+def generate_vertices(
+    heightmap: NDArray[np.float64],
+    config: TerrainConfig,
+) -> Terrain:
     vertices: Vertices = []
     indices: Indices = []
 

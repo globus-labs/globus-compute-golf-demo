@@ -3,10 +3,10 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import Executor, ProcessPoolExecutor
 from typing import Sequence
 
-from globus_compute_sdk import Executor
+from globus_compute_sdk import Executor as GlobusComputeExecutor
 
 from simulation.config import SimulationConfig
 from simulation.config import TerrainConfig
@@ -78,7 +78,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger.info(f'Generated {len(initial_positions)} initial position(s)')
 
     if args.endpoint:
-        executor = Executor(endpoint_id=args.endpoint)
+        executor: Executor = GlobusComputeExecutor(endpoint_id=args.endpoint)
         logger.info(
             f'Initialized Globus Compute Executor with UUID {args.endpoint}',
         )

@@ -8,6 +8,7 @@ A golf green is randomly generated using [Perlin noise](https://en.wikipedia.org
 * [Installation](#installation)
 * [Visualize a Simulation](#visualize-a-simulation)
 * [Simulate at Scale](#simulate-at-scale)
+* [Contributing](#contributing)
 
 ## Installation
 
@@ -78,3 +79,22 @@ The script visualizes the results of the simulations via plots that are saved to
 
 **3D Terrain Heatmap** (`images/terrain.png`)
 ![](images/terrain.png)
+
+## Contributing
+
+To contributed to this repository:
+
+1. Fork and/or create a branch for your features/changes.
+   The `main` branch of this repository has branch protection enabled so all changes must be made via a pull request.
+2. Install the package with development dependencies.
+   ```bash
+   pip install -e .[dev]
+   ```
+3. Make your changes.
+4. Apply `ruff` formatting, then ensure the linting and static type checking passes.
+   ```bash
+   ruff format run_*.py simulation
+   ruff check --fix run_*.py simulation
+   mypy run_*.py simulation
+   ```
+5. Commit your changes and open a pull request.
