@@ -1,0 +1,58 @@
+name: tests
+
+on:
+  push:
+    branches: [main, test-me-*]
+    tags:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-latest
+          python: 3.8
+          toxenv: py38
+        - os: ubuntu-latest
+          python: 3.9
+          toxenv: py39
+        - os: ubuntu-latest
+          python: '3.10'
+          toxenv: py310
+        - os: ubuntu-latest
+          python: '3.11'
+          toxenv: py311
+        - os: ubuntu-latest
+          python: '3.12'
+          toxenv: py312
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade setuptools pip
+          pip install .[dev]
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Check with mypy
+        run: mypy .
+
+      - name: Run Single Simulation
+        name: python run_single.py --total-time 1 --no-gui
+
+      - name: Run Multiple Simulations
+        name: python run_globus_compute.py --num-balls 16 --process-pool 4

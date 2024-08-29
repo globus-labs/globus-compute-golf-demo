@@ -5,7 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "simulation"
 version = "0.1.0"
-authors = [{name = "Sathvick Sudarsan", email = "sathvicksudarsan@gmail.com"}]
+authors = [
+    {name = "Sathvick Sudarsan", email = "sathvicksudarsan@gmail.com"},
+    {name = "Greg Pauloski", email = "jgpauloski@uchicago.edu"},
+    {name = "Globus Labs"},
+]
 description = "Globus Compute golf simulation demo"
 readme = "README.md"
 license = {text = "MIT"}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import NDArray
 from scipy.ndimage import gaussian_filter
 from scipy.stats import gaussian_kde
 
@@ -12,7 +13,7 @@ from simulation.simulate import Position
 def create_contour_plot(
     initial_positions: list[Position],
     final_positions: list[Position],
-    heightmap: np.ndarray,
+    heightmap: NDArray[np.float64],
     config: TerrainConfig,
     filepath: str,
 ) -> None:
@@ -47,7 +48,7 @@ def create_contour_plot(
 def create_terrain_plot(
     initial_positions: list[Position],
     final_positions: list[Position],
-    heightmap: np.ndarray,
+    heightmap: NDArray[np.float64],
     config: TerrainConfig,
     filepath: str,
 ) -> None:
@@ -79,11 +80,13 @@ def create_terrain_plot(
             kde_grid[yi_scaled, xi_scaled] = kde[i]
 
         kde_smoothed = gaussian_filter(kde_grid, sigma=1)
-        ax.plot_surface(
+        ax.plot_surface(  # type: ignore[attr-defined]
             x,
             y,
             heightmap,
-            facecolors=plt.cm.jet(kde_smoothed / kde_smoothed.max()),
+            facecolors=plt.cm.jet(  # type: ignore[attr-defined]
+                kde_smoothed / kde_smoothed.max()
+            ),
             alpha=0.9,
         )
 
@@ -91,10 +94,10 @@ def create_terrain_plot(
         ax.set_title(title, pad=-20)
         ax.set_xlim(0, config.width)
         ax.set_ylim(0, config.width)
-        ax.set_zlim(0, 2 * heightmap.max())
+        ax.set_zlim(0, 2 * heightmap.max())  # type: ignore[attr-defined]
         ax.set_xlabel('X Position (m)')
         ax.set_ylabel('Y Position (m)')
-        ax.set_zlabel('Z Position (m)')
+        ax.set_zlabel('Z Position (m)')  # type: ignore[attr-defined]
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.15, left=0, right=0.92, bottom=0.05, top=0.98)
