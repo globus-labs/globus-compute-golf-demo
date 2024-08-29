@@ -11,10 +11,6 @@ A golf green is randomly generated using [Perlin noise](https://en.wikipedia.org
 
 ## Installation
 
-> [!WARNING]
-> We have encounter PyBullet crashes on Apple Silicon.
-> The Globus Compute script can still be run provided the Globus Compute Endpoint is running on Linux.
-
 1. **Clone the repository and navigate to the project directory:**
    ```bash
    git clone https://github.com/globus-labs/globus-compute-golf-demo
@@ -43,6 +39,10 @@ A golf green is randomly generated using [Perlin noise](https://en.wikipedia.org
    For more information on configuring Endpoints, check out the [docs](https://globus-compute.readthedocs.io/en/latest/endpoints/index.html).
 
 ## Visualize a Simulation
+
+> [!WARNING]
+> We have encountered PyBullet crashes on Apple Silicon.
+> The Globus Compute script in the following section can still be run provided the Globus Compute Endpoint is running on Linux.
 
 We will start with running a single simulation locally to visualize what the simulation looks like.
 This will generate a random terrain and drop a ball at a random position.

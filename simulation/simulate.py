@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import random
 import time
 from typing import Any
@@ -13,6 +14,8 @@ from noise import pnoise2
 from simulation.config import SimulationConfig
 from simulation.config import TerrainConfig
 
+logger = logging.getLogger(__name__)
+
 Position = tuple[float, float, float]
 Vertices = list[Position]
 Indices = list[int]
@@ -20,12 +23,16 @@ Terrain = tuple[Vertices, Indices]
 
 
 def generate_initial_positions(
-    num_balls: int, config: TerrainConfig,
+    num_balls: int,
+    config: TerrainConfig,
+    seed: int | None = None,
 ) -> list[Position]:
     buffer = 0.2 * config.width
     min_width, max_width = buffer, config.width - buffer
 
-    def _generate() -> tuple[float]:
+    random.seed(seed)
+
+    def _generate() -> Position:
         return (
             random.uniform(min_width, max_width),
             random.uniform(min_width, max_width),
@@ -158,7 +165,7 @@ def run_simulation(
         meshScale=[1, 1, 1],
         vertices=vertices,
         indices=indices,
-        rgbaColor=[0, 1, 0, 1],
+        rgbaColor=[88 / 255, 161 / 255, 119 / 255, 1],
         specularColor=[0.4, 0.4, 0],
     )
 
@@ -201,10 +208,17 @@ def run_simulation(
             ],
         )
 
+    logger.debug(
+        f'Simulating for {sim_config.total_time} '
+        f'({sim_config.tick_rate} steps per seconds)',
+    )
+
     for _ in range(sim_config.total_time * sim_config.tick_rate):
         p.stepSimulation()
         if gui:
             time.sleep(1 / sim_config.tick_rate)
+
+    logger.debug('Simulation completed')
 
     final_positions = [
         p.getBasePositionAndOrientation(ball_id)[0] for ball_id in ball_ids

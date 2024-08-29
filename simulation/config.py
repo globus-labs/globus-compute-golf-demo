@@ -90,6 +90,7 @@ class SimulationConfig:
     ball_mass: float
     tick_rate: int
     total_time: int
+    seed: int | None
 
     @classmethod
     def add_argument_group(cls, parser: argparse.ArgumentParser) -> None:
@@ -118,6 +119,7 @@ class SimulationConfig:
             default=10,
             help='total number of seconds to run the simulation for',
         )
+        group.add_argument('--seed', type=int, help='random seed')
 
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> SimulationConfig:
@@ -126,4 +128,5 @@ class SimulationConfig:
             ball_mass=args.ball_mass,
             tick_rate=args.tick_rate,
             total_time=args.total_time,
+            seed=args.seed,
         )
