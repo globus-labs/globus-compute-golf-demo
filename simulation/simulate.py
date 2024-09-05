@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+import math
 import random
+import sys
 import time
-from typing import Any
 
 import numpy as np
 import pybullet as p
@@ -20,7 +21,22 @@ logger = logging.getLogger(__name__)
 Position = tuple[float, float, float]
 Vertices = list[Position]
 Indices = list[int]
-Terrain = tuple[Vertices, Indices]
+TerrainPart = tuple[Vertices, Indices]
+# The two floats here represent the x, y positions where the terrain
+# part starts at.
+Terrain = list[tuple[float, float, TerrainPart]]
+
+# PyBullet has a limit of 131,072 vertices for a mesh map on Windows/Linux
+# but only 8,192 on MacOS due to the smaller shared memory default on MacOS.
+#   https://github.com/bulletphysics/bullet3/issues/1965
+# So we need to split our terrain into smaller chunks. This parameter
+# controls the maximum number of points in each chunk.
+# These numbers are chosen to be half the max vertex count in pybullet.
+#  https://github.com/bulletphysics/bullet3/blob/e9c461b0ace140d5c73972760781d94b7b5eee53/examples/SharedMemory/SharedMemoryPublic.h#L1128-L1134
+if sys.platform == 'darwin':
+    MAX_VERTICES_PER_MESH = 4192
+else:
+    MAX_VERTICES_PER_MESH = 65536
 
 
 def generate_initial_positions(
@@ -64,10 +80,10 @@ def generate_noisemap(config: TerrainConfig) -> NDArray[np.float64]:
     return (heightmap - old_min) * config.height / old_max
 
 
-def generate_vertices(
+def _generate_vertices(
     heightmap: NDArray[np.float64],
-    config: TerrainConfig,
-) -> Terrain:
+    resolution: int,
+) -> TerrainPart:
     vertices: Vertices = []
     indices: Indices = []
 
@@ -77,7 +93,7 @@ def generate_vertices(
         for j in range(height):
             # Each vertex is represented by (x, y, z), where:
             # x = column index (j), y = row index (i), z = height value
-            ii, jj = i / config.resolution, j / config.resolution
+            ii, jj = i / resolution, j / resolution
             vertices.append((jj, ii, heightmap[i][j]))
 
     for i in range(width - 1):
@@ -96,12 +112,69 @@ def generate_vertices(
     return vertices, indices
 
 
+def generate_vertices(
+    heightmap: NDArray[np.float64],
+    config: TerrainConfig,
+) -> Terrain:
+    width, height = heightmap.shape[0], heightmap.shape[1]
+    vertices = width * height
+    parts = math.ceil(vertices / MAX_VERTICES_PER_MESH)
+    max_width_per_part = math.ceil(width / parts)
+
+    terrain: Terrain = []
+    for x1 in range(0, width, max_width_per_part):
+        # Add one to right index of slice so that the terrain parts
+        # overlap each other slightly.
+        x2 = min(width, x1 + max_width_per_part + 1)
+        # For now, we only split on axis 0 (referred to as x-axis).
+        y = 0 / config.resolution
+        heightmap_part = heightmap[x1:x2, :]
+        terrain_part = _generate_vertices(heightmap_part, config.resolution)
+        terrain.append((x1 / config.resolution, y, terrain_part))
+
+    return terrain
+
+
+def _create_terrain_body(terrain: Terrain) -> list[int]:
+    terrain_ids: list[int] = []
+
+    for part in terrain:
+        x, y, (vertices, indices) = part
+
+        collision_shape_id = p.createCollisionShape(
+            shapeType=p.GEOM_MESH,
+            meshScale=[1, 1, 1],
+            vertices=vertices,
+            indices=indices,
+        )
+
+        visual_shape_id = p.createVisualShape(
+            shapeType=p.GEOM_MESH,
+            meshScale=[1, 1, 1],
+            vertices=vertices,
+            indices=indices,
+            rgbaColor=[88 / 255, 161 / 255, 119 / 255, 1],
+            specularColor=[0.4, 0.4, 0],
+        )
+
+        terrain_id = p.createMultiBody(
+            baseMass=0,
+            baseCollisionShapeIndex=collision_shape_id,
+            baseVisualShapeIndex=visual_shape_id,
+            basePosition=[y, x, 0],
+        )
+
+        terrain_ids.append(terrain_id)
+
+    return terrain_ids
+
+
 def _create_ball_body(
     position: Position,
     radius: float = 0.1,
     mass: float = 0.1,
     max_velocity: float = 1.0,
-) -> Any:
+) -> int:
     ball_visual_shape_id = p.createVisualShape(
         shapeType=p.GEOM_SPHERE,
         radius=radius,
@@ -146,8 +219,6 @@ def run_simulation(
     terrain_config: TerrainConfig,
     gui: bool = True,
 ) -> list[Position]:
-    vertices, indices = terrain
-
     if gui:
         p.connect(p.GUI)
     else:
@@ -156,39 +227,6 @@ def run_simulation(
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
     p.setTimeStep(1 / sim_config.tick_rate)
     p.setGravity(0, 0, -9.81)
-
-    collision_shape_id = p.createCollisionShape(
-        shapeType=p.GEOM_MESH,
-        meshScale=[1, 1, 1],
-        vertices=vertices,
-        indices=indices,
-    )
-
-    visual_shape_id = p.createVisualShape(
-        shapeType=p.GEOM_MESH,
-        meshScale=[1, 1, 1],
-        vertices=vertices,
-        indices=indices,
-        rgbaColor=[88 / 255, 161 / 255, 119 / 255, 1],
-        specularColor=[0.4, 0.4, 0],
-    )
-
-    p.createMultiBody(
-        baseMass=0,
-        baseCollisionShapeIndex=collision_shape_id,
-        baseVisualShapeIndex=visual_shape_id,
-        basePosition=[0, 0, 0],
-    )
-
-    ball_ids = [
-        _create_ball_body(
-            position,
-            radius=sim_config.ball_diameter / 2,
-            mass=sim_config.ball_mass,
-            max_velocity=0.1 * terrain_config.width,
-        )
-        for position in positions
-    ]
 
     if gui:
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
@@ -211,6 +249,18 @@ def run_simulation(
                 10 * terrain_config.height,
             ],
         )
+
+    _create_terrain_body(terrain)
+
+    ball_ids = [
+        _create_ball_body(
+            position,
+            radius=sim_config.ball_diameter / 2,
+            mass=sim_config.ball_mass,
+            max_velocity=0.1 * terrain_config.width,
+        )
+        for position in positions
+    ]
 
     logger.debug(
         f'Simulating for {sim_config.total_time} '
