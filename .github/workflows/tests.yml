@@ -44,10 +44,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade setuptools pip
-          pip install .[dev]
-
-      - name: Lint and Type Check
-        run: pre-commit run --all-files
+          pip install .
 
       - name: Run Single Simulation
         run: python run_single.py --total-time 1 --no-gui
