@@ -12,6 +12,7 @@ authors = [
 ]
 description = "Globus Compute golf simulation demo"
 readme = "README.md"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 dependencies = [
     "globus-compute-endpoint",

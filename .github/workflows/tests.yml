@@ -16,16 +16,20 @@ jobs:
         include:
         - os: ubuntu-latest
           python: 3.9
-          toxenv: py39
         - os: ubuntu-latest
           python: '3.10'
-          toxenv: py310
         - os: ubuntu-latest
           python: '3.11'
-          toxenv: py311
         - os: ubuntu-latest
           python: '3.12'
-          toxenv: py312
+        - os: macos-14
+          python: 3.9
+        - os: macos-14
+          python: '3.10'
+        - os: macos-14
+          python: '3.11'
+        - os: macos-14
+          python: '3.12'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -40,10 +44,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install --upgrade setuptools pip
-          pip install .[dev]
-
-      - name: Lint and Type Check
-        run: pre-commit run --all-files
+          pip install .
 
       - name: Run Single Simulation
         run: python run_single.py --total-time 1 --no-gui

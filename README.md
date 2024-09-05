@@ -41,10 +41,6 @@ A golf green is randomly generated using [Perlin noise](https://en.wikipedia.org
 
 ## Visualize a Simulation
 
-> [!WARNING]
-> We have encountered PyBullet crashes on Apple Silicon.
-> The Globus Compute script in the following section can still be run provided the Globus Compute Endpoint is running on Linux.
-
 We will start with running a single simulation locally to visualize what the simulation looks like.
 This will generate a random terrain and drop a ball at a random position.
 
