@@ -49,7 +49,7 @@ python run_single.py --num-balls 100
 ```
 
 You should see a pop up window that looks like the following.
-![](images/simulation.png)
+![](static/simulation.png)
 
 The parameters of the simulation are fully configurable.
 Use `python run_single.py --help` to see all of the options.
@@ -71,10 +71,10 @@ Because the simulations are executed in parallel on remote processes, the simula
 The script visualizes the results of the simulations via plots that are saved to `images/`.
 
 **2D Contour Plot** (`images/contour.png`)
-![](images/contour.png)
+![](static/contour.png)
 
 **3D Terrain Heatmap** (`images/terrain.png`)
-![](images/terrain.png)
+![](static/terrain.png)
 
 ## Contributing
 
