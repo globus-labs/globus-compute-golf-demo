@@ -44,7 +44,7 @@ def create_contour_plot(
         ax.set_facecolor('#58a177')
 
     fig.tight_layout(w_pad=2)
-    
+
     pathlib.Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(filepath, pad_inches=0.05, dpi=300)
 
@@ -105,6 +105,6 @@ def create_terrain_plot(
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.15, left=0, right=0.92, bottom=0.05, top=0.98)
-    
+
     pathlib.Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(filepath, dpi=300)

@@ -59,15 +59,21 @@ def generate_initial_positions(
     return [_generate() for _ in range(num_balls)]
 
 
-def generate_noisemap(config: TerrainConfig) -> NDArray[np.float64]:
+def generate_noisemap(
+    config: TerrainConfig, seed: int | None = None,
+) -> NDArray[np.float64]:
     dimension = config.width * config.resolution
     heightmap = np.zeros((dimension, dimension))
 
+    offset = seed if seed is not None else random.randint(0, 1_000_000)
+
     for i in range(dimension):
         for j in range(dimension):
+            x = (i / config.resolution) / config.scale
+            y = (j / config.resolution) / config.scale
             heightmap[i][j] = pnoise2(
-                (i / config.resolution) / config.scale,
-                (j / config.resolution) / config.scale,
+                x + offset,
+                y + offset,
                 octaves=config.octaves,
                 persistence=config.persistence,
                 lacunarity=config.lacunarity,
