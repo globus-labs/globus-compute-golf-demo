@@ -54,6 +54,9 @@ You should see a pop up window that looks like the following.
 The parameters of the simulation are fully configurable.
 Use `python run_single.py --help` to see all of the options.
 
+For example, set `--width 50` to increase the size of the terrain.
+This will also zoom the camera out so it may be difficult to see the balls; the ball size can be changed with `--ball-diameter`.
+
 ## Simulate at Scale
 
 Next, we can run the same simulation at scale by generating `n` random initial ball positions and submitting one simulation per ball to Globus Compute.
@@ -66,6 +69,10 @@ python run_globus_compute.py --num-balls 1000 --endpoint <UUID>
 
 > [!TIP]
 > Passing `--process-pool 8` instead of `--endpoint <UUID>` will run the simulations across a pool of 8 local processes rather than via Globus Compute.
+
+> [!WARNING]
+> Increasing the width of the terrain or the resolution of the terrain will increase the size of the mesh map.
+> Globus Compute has a 10MB payload limit which can be exceeded if the terrain is too large.
 
 Because the simulations are executed in parallel on remote processes, the simulations are performed in a "headless" mode (i.e., the simulation is not rendered to the screen).
 The script visualizes the results of the simulations via plots that are saved to `images/`.
