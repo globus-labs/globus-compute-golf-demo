@@ -60,7 +60,8 @@ def generate_initial_positions(
 
 
 def generate_noisemap(
-    config: TerrainConfig, seed: int | None = None,
+    config: TerrainConfig,
+    seed: int | None = None,
 ) -> NDArray[np.float64]:
     dimension = config.width * config.resolution
     heightmap = np.zeros((dimension, dimension))
@@ -237,7 +238,7 @@ def run_simulation(
     if gui:
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         p.resetDebugVisualizerCamera(
-            cameraDistance=terrain_config.width / 2,
+            cameraDistance=max(terrain_config.width / 2, 10),
             cameraYaw=0,
             cameraPitch=-55,
             cameraTargetPosition=[
