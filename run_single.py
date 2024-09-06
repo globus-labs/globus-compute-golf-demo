@@ -47,7 +47,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     sim_config = SimulationConfig.from_args(args)
     terrain_config = TerrainConfig.from_args(args)
 
-    terrain_heightmap = generate_noisemap(terrain_config)
+    terrain_heightmap = generate_noisemap(terrain_config, seed=sim_config.seed)
     terrain_mesh = generate_vertices(terrain_heightmap, terrain_config)
 
     initial_positions = generate_initial_positions(
