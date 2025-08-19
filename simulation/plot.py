@@ -84,7 +84,7 @@ def create_terrain_plot(
             kde_grid[yi_scaled, xi_scaled] = kde[i]
 
         kde_smoothed = gaussian_filter(kde_grid, sigma=1)
-        ax.plot_surface(  # type: ignore[attr-defined]
+        ax.plot_surface(
             x,
             y,
             heightmap,
@@ -98,10 +98,10 @@ def create_terrain_plot(
         ax.set_title(title, pad=-20)
         ax.set_xlim(0, config.width)
         ax.set_ylim(0, config.width)
-        ax.set_zlim(0, 2 * heightmap.max())  # type: ignore[attr-defined]
+        ax.set_zlim(0, 2 * heightmap.max())
         ax.set_xlabel('X Position (m)')
         ax.set_ylabel('Y Position (m)')
-        ax.set_zlabel('Z Position (m)')  # type: ignore[attr-defined]
+        ax.set_zlabel('Z Position (m)')
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.15, left=0, right=0.92, bottom=0.05, top=0.98)
